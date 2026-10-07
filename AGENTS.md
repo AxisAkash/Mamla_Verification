@@ -15,7 +15,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Architecture:** Keep route composition in `src/app`, reusable feature UI in `src/components`, shared constants/utilities in `src/lib`, domain models in `src/types`, and temporary demo records in `src/data`.
 - **Components:** Organize by feature (`landing`, `verification`, `evidence`, `legal`, `shared`). Keep visual components free of API/backend implementations.
 - **TypeScript:** Prefer explicit domain types and narrow unions. Avoid `any`; use typed mock data and accessible semantic HTML.
-- **Design:** Preserve the calm legal-tech palette (emerald, warm gold, off-white), clear evidence/citation traceability, responsive layouts, visible focus states, and the legal disclaimer. Never present mock law or results as authoritative.
+- **Design:** Preserve the calm legal-tech palette (emerald, warm gold, off-white), Manrope/Noto Sans Bengali typography, clear Claim → Evidence → Law → Result traceability, responsive layouts, visible focus states, and the legal disclaimer. Never present mock law or results as authoritative.
+- **UX principles:** Answer first, keep proof one tap away, let users confirm extracted facts before checking law, make uncertainty useful, keep chat optional, and treat Bangla as a first-class language foundation.
 - **Dependencies:** Add only dependencies needed by the current frontend. Do not add state, data-fetching, animation, or form libraries without a concrete requirement.
 - **Git:** `akash` is the development branch. `main` is the integration/merge branch and must not receive direct development commits. Never force-push.
 - **Validation:** Run `npm run lint` and `npm run build` before committing. Do not bypass TypeScript or ESLint errors.

@@ -2,7 +2,7 @@
 
 **Verify Before You Pay. Know What the Law Says.**
 
-Mamla Verification is an AI-assisted legal and traffic-notice verification frontend. It presents an evidence-oriented workflow for structuring a traffic notice, reviewing supporting material, tracing legal citations, and understanding the limits of a result.
+Mamla Verification is an AI-assisted legal and traffic-notice verification frontend. It presents an evidence-oriented workflow for structuring a traffic notice, confirming extracted facts, comparing the notice with retained legal conditions, and understanding the limits of a result.
 
 > This repository currently contains a frontend demonstration only. Its case records, citations, provisions, and outcomes are mock data and are not legal advice or official records.
 
@@ -59,13 +59,13 @@ src/
   types/                   Case, verification, and legal domain models
 ```
 
-## Design direction
+## Design philosophy
 
-The interface uses a calm legal-tech visual system: deep emerald, warm gold accents, off-white surfaces, restrained status colors, editorial typography, and evidence that stays traceable to its source. Responsive layouts preserve the investigation workspace on desktop and move evidence into a drawer on smaller screens.
+The product is designed around calm competence rather than chatbot novelty. It answers first, keeps proof one tap away, shows the Notice vs Law comparison, makes honest uncertainty a first-class result, and lets the user confirm extracted facts before any legal comparison. The visual system uses deep emerald, restrained warm gold, off-white surfaces, Manrope for Latin UI, Noto Sans Bengali as the language foundation, and evidence that stays traceable to its source.
 
 ## Current scope
 
-The current phase is frontend only. The submission flow is simulated and uses local mock data. OCR, AI/RAG, authentication, persistence, external APIs, payments, and backend services are not implemented.
+The current phase is frontend only. The submission flow, fact confirmation, analysis state, optional case questions, and report are simulated with local mock data. OCR, AI/RAG, authentication, persistence, external APIs, payments, and backend services are not implemented.
 
 ## Future integration
 
