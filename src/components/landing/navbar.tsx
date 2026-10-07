@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 
 import { Logo } from "@/components/shared/logo";
+import { LanguageToggle } from "@/components/shared/language-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -48,11 +49,12 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle className="hidden sm:inline-flex" />
           <Link
             href="/verify"
             className={cn(buttonVariants({ size: "default" }), "hidden sm:inline-flex")}
           >
-            Verify a Notice
+            Start a Verification
           </Link>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -62,7 +64,7 @@ export function Navbar() {
                 <Button
                   variant="outline"
                   size="icon-sm"
-                  className="md:hidden"
+                  className="min-h-11 min-w-11 md:hidden"
                 />
               }
             >
@@ -75,6 +77,8 @@ export function Navbar() {
                   Navigate the verification experience.
                 </SheetDescription>
               </SheetHeader>
+
+              <LanguageToggle className="w-fit" />
 
               <nav aria-label="Mobile" className="flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
@@ -96,7 +100,7 @@ export function Navbar() {
                 onClick={() => setOpen(false)}
                 className={cn(buttonVariants({ size: "lg" }), "w-full")}
               >
-                Verify a Notice
+                Start a Verification
               </Link>
             </SheetContent>
           </Sheet>

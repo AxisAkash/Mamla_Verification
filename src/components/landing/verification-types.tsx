@@ -12,7 +12,7 @@ export function VerificationTypes() {
         <SectionHeading
           eyebrow="What we verify"
           title="Bring the notice in whatever form you have it"
-          description="A printed photo, a PDF, a portal link, or plain text — the workspace accepts the material you already hold and structures it into a case record."
+          description="You do not need an account. Start with a photo, a document, a link, or a description and we will show you the facts before asking you to verify them."
         />
 
         <ul className="grid gap-4 sm:grid-cols-2">
@@ -30,7 +30,14 @@ export function VerificationTypes() {
                 >
                   <Icon className="size-5" />
                 </span>
-                <h3 className="type-h3 mt-4 text-ink">{type.title}</h3>
+                <p className="type-caption mt-4 text-brand">{type.title}</p>
+                <h3 className="type-h3 mt-4 text-ink">
+                  {type.title === "Images" || type.title === "Documents"
+                    ? "Upload a notice"
+                    : type.title === "URLs"
+                      ? "Paste a link"
+                      : "Describe it"}
+                </h3>
                 <p className="type-small mt-1.5 text-ink-secondary">
                   {type.description}
                 </p>

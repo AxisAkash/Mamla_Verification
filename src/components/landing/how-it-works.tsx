@@ -15,7 +15,8 @@ export function HowItWorks() {
           description="Four deliberate stages keep every step of the verification visible and reviewable."
         />
 
-        <ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <span aria-hidden="true" className="absolute top-11 right-[12.5%] left-[12.5%] hidden h-px bg-border lg:block" />
           {PIPELINE_STEPS.map((stage) => {
             const Icon = stage.icon;
 
