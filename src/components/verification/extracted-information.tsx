@@ -6,23 +6,24 @@ import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { demoExtracted } from "@/data/mock-data";
-import type { ExtractedField } from "@/types/verification";
+import type { ExtractedInformation, NoticeFact } from "@/types/verification";
 
 interface ExtractedInformationPanelProps {
-  onConfirm: (fields: ExtractedField[]) => void;
+  extracted: ExtractedInformation;
+  onConfirm: (fields: NoticeFact[]) => void;
   onRestart: () => void;
 }
 
 export function ExtractedInformationPanel({
+  extracted,
   onConfirm,
   onRestart,
 }: ExtractedInformationPanelProps) {
-  const [fields, setFields] = useState<ExtractedField[]>(demoExtracted.fields);
+  const [fields, setFields] = useState<NoticeFact[]>(extracted.fields);
 
-  function updateField(label: string, value: string) {
+  function updateField(key: string, value: string) {
     setFields((current) =>
-      current.map((field) => (field.label === label ? { ...field, value } : field))
+      current.map((field) => (field.key === key ? { ...field, value } : field))
     );
   }
 
@@ -37,17 +38,17 @@ export function ExtractedInformationPanel({
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-border bg-canvas px-3 py-1 text-xs font-medium text-ink-secondary">
-              Source · {demoExtracted.sourceLabel}
+              Source · {extracted.sourceLabel}
             </span>
             <span className="rounded-full border border-brand/20 bg-brand-soft px-3 py-1 text-xs font-medium text-brand">
-              {demoExtracted.overallConfidence}% overall confidence
+              {extracted.overallConfidence}% overall confidence
             </span>
           </div>
         </CardHeader>
 
         <CardContent className="grid gap-3 px-5 py-5 sm:grid-cols-2 sm:px-7 sm:py-7">
           {fields.map((field) => (
-            <label key={field.label} className="rounded-lg border border-border bg-card p-4">
+            <label key={field.key} className="rounded-lg border border-border bg-card p-4">
               <span className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium text-ink-secondary">{field.label}</span>
                 {field.confidence !== undefined ? (
@@ -56,7 +57,7 @@ export function ExtractedInformationPanel({
               </span>
               <Input
                 value={field.value}
-                onChange={(event) => updateField(field.label, event.currentTarget.value)}
+                onChange={(event) => updateField(field.key, event.currentTarget.value)}
                 className="mt-2 h-10 bg-canvas text-sm font-semibold text-ink"
                 aria-label={`Edit ${field.label}`}
               />

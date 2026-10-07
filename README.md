@@ -77,3 +77,16 @@ Feature UI reads explicit TypeScript domain models and mock records from `src/da
 - `akash` → active development branch
 
 Develop and commit on `akash`. Do not make direct development commits to `main`; merge reviewed work into `main` through the repository's integration workflow.
+
+## Backend-readiness boundary
+
+The frontend now keeps route composition, typed domain models, and mock-backed
+case operations separate. The service boundary in
+`src/lib/services/case-service.ts` is the only UI-facing access path for
+case workflow data. It can later be replaced by an API adapter without adding
+backend behavior to this repository.
+
+The future endpoint shapes for create/get case, notice extraction, fact
+confirmation, verification, and evidence retrieval are documented in
+[`docs/api-contract.md`](docs/api-contract.md). No endpoint, database, OCR,
+AI/RAG, external API, authentication, or real legal data is implemented.

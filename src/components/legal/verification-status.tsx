@@ -11,10 +11,10 @@ import { STATUS_META } from "@/lib/constants";
 import type { VerificationStatus } from "@/types/verification";
 
 const STATUS_ICONS: Record<VerificationStatus, LucideIcon> = {
-  CONFORMS_TO_RETAINED_LEGAL_PROVISIONS: BadgeCheck,
+  CONFORMS: BadgeCheck,
   POTENTIALLY_NONCOMPLIANT: TriangleAlert,
   INSUFFICIENT_INFORMATION: CircleHelp,
-  MANUAL_LEGAL_REVIEW_NEEDED: Gavel,
+  MANUAL_LEGAL_REVIEW: Gavel,
 };
 
 interface VerificationStatusBadgeProps {

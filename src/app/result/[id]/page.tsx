@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdvisoryReport } from "@/components/legal/advisory-report";
-import {
-  getCaseById,
-  getResolvedResultByCaseId,
-} from "@/data/mock-data";
+import { getCase, getCaseResult } from "@/lib/services/case-service";
 
 export const metadata: Metadata = {
   title: "Verification result",
@@ -36,8 +33,8 @@ export default function ResultPage({ params }: ResultPageProps) {
 
 async function ResultContent({ params }: ResultPageProps) {
   const { id } = await params;
-  const caseRecord = getCaseById(id);
-  const result = getResolvedResultByCaseId(id);
+  const caseRecord = getCase(id);
+  const result = getCaseResult(id);
 
   if (!caseRecord || !result) notFound();
 

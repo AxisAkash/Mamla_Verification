@@ -161,7 +161,7 @@ export interface StatusMeta {
 }
 
 export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
-  CONFORMS_TO_RETAINED_LEGAL_PROVISIONS: {
+  CONFORMS: {
     label: "Conforms to Retained Legal Provisions",
     shortLabel: "Conforms",
     plainLabel: "The fine appears consistent with the law.",
@@ -197,7 +197,7 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
       "border-status-neutral-border bg-status-neutral-bg text-status-neutral",
     dotClassName: "bg-status-neutral",
   },
-  MANUAL_LEGAL_REVIEW_NEEDED: {
+  MANUAL_LEGAL_REVIEW: {
     label: "Manual Legal Review Needed",
     shortLabel: "Manual Review",
     plainLabel: "This case needs a closer legal review.",

@@ -1,5 +1,11 @@
 import type { VerificationInputType, VerificationStatus } from "./verification";
 
+/**
+ * Category of notice the system can intake. Currently traffic-only; the union
+ * is an extension point for future notice categories.
+ */
+export type NoticeType = "traffic";
+
 export interface VehicleInformation {
   registrationNumber: string;
   type: string;
@@ -9,6 +15,7 @@ export interface VehicleInformation {
 }
 
 export interface TrafficNotice {
+  noticeType: NoticeType;
   noticeNumber: string;
   issuingAuthority: string;
   issuedAt: string;
@@ -23,6 +30,7 @@ export interface Case {
   reference: string;
   title: string;
   createdAt: string;
+  updatedAt?: string;
   inputType: VerificationInputType;
   sourceLabel: string;
   notice: TrafficNotice;
