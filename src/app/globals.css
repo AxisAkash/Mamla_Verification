@@ -7,21 +7,23 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-manrope);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  --font-heading: var(--font-inter);
+  --font-heading: var(--font-manrope);
 
   /* Brand palette */
   --color-brand: #075b45;
   --color-brand-dark: #043c30;
-  --color-brand-soft: #e8f1ee;
+  --color-brand-soft: #e8f3ef;
+  --color-brand-wash: #f1f8f5;
   --color-gold: #d9a441;
   --color-gold-soft: #f4e4b5;
   --color-canvas: #f8faf9;
   --color-ink: #17211e;
-  --color-ink-secondary: #66736e;
-  --color-ink-muted: #98a29e;
+  --color-ink-secondary: #4d5a55;
+  --color-ink-muted: #6b7772;
+  --color-line: #dfe7e3;
 
   /* Semantic verification statuses */
   --color-status-conforms: #0f7a56;
@@ -30,9 +32,9 @@
   --color-status-alert: #a2452f;
   --color-status-alert-bg: #f8edea;
   --color-status-alert-border: #eacfc8;
-  --color-status-neutral: #5a6763;
-  --color-status-neutral-bg: #eef2f1;
-  --color-status-neutral-border: #dce3e1;
+  --color-status-neutral: #315c7d;
+  --color-status-neutral-bg: #edf5fa;
+  --color-status-neutral-border: #c8dcea;
   --color-status-review: #8a6521;
   --color-status-review-bg: #f7f0e1;
   --color-status-review-border: #e6d9bc;
@@ -91,8 +93,8 @@
   --accent: #edf2ef;
   --accent-foreground: #043c30;
   --destructive: #b42318;
-  --border: #e3e9e6;
-  --input: #d8e0dc;
+  --border: #dfe7e3;
+  --input: #cfdcd6;
   --ring: #075b45;
   --chart-1: #075b45;
   --chart-2: #d9a441;
@@ -154,6 +156,9 @@
   html {
     @apply scroll-smooth font-sans;
   }
+  html.font-bangla body {
+    font-family: var(--font-bengali), var(--font-manrope), sans-serif;
+  }
   ::selection {
     background-color: var(--color-gold-soft);
     color: var(--color-ink);
@@ -195,7 +200,7 @@
   }
 
   .type-small {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     line-height: 1.55;
   }
 
@@ -219,5 +224,29 @@
       linear-gradient(to right, rgb(23 33 30 / 0.05) 1px, transparent 1px),
       linear-gradient(to bottom, rgb(23 33 30 / 0.05) 1px, transparent 1px);
     background-size: 48px 48px;
+  }
+
+  .section-rule {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .focus-ring:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-brand) 35%, transparent);
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

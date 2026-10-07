@@ -41,6 +41,14 @@ export interface ExtractedInformation {
   sourceLabel: string;
 }
 
+export interface NextStep {
+  id: string;
+  label: string;
+  description: string;
+  href?: string;
+  tone?: "default" | "attention" | "quiet";
+}
+
 export interface VerificationResult {
   id: string;
   caseId: string;
@@ -55,6 +63,7 @@ export interface VerificationResult {
   evidenceIds: string[];
   generatedAt: string;
   confidence: number;
+  nextSteps: NextStep[];
 }
 
 export interface ResolvedVerificationResult

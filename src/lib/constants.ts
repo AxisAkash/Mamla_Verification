@@ -30,7 +30,12 @@ export const BRAND = {
 export const NAV_LINKS = [
   { label: "How It Works", href: "/#how-it-works" },
   { label: "What We Verify", href: "/#what-we-verify" },
-  { label: "About", href: "/#about" },
+  { label: "How We Check", href: "/#notice-vs-law" },
+] as const;
+
+export const LANGUAGE_OPTIONS = [
+  { value: "en", label: "EN" },
+  { value: "bn", label: "বাংলা" },
 ] as const;
 
 export interface InputMode {
@@ -94,9 +99,9 @@ export const PIPELINE_STEPS = [
   },
   {
     step: "02",
-    title: "Extract",
+    title: "Read",
     description:
-      "Key notice details are structured into a reviewable case record.",
+      "Relevant notice details are extracted into a reviewable case record.",
     icon: FileSearch,
   },
   {
@@ -148,6 +153,7 @@ export const DISCLAIMER_POINTS = [
 export interface StatusMeta {
   label: string;
   shortLabel: string;
+  plainLabel: string;
   description: string;
   badgeClassName: string;
   panelClassName: string;
@@ -158,6 +164,7 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
   CONFORMS_TO_RETAINED_LEGAL_PROVISIONS: {
     label: "Conforms to Retained Legal Provisions",
     shortLabel: "Conforms",
+    plainLabel: "The fine appears consistent with the law.",
     description:
       "No conflict was found between the submitted material and the provisions consulted during this demonstration run.",
     badgeClassName:
@@ -168,7 +175,8 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
   },
   POTENTIALLY_NONCOMPLIANT: {
     label: "Potentially Noncompliant",
-    shortLabel: "Potentially Noncompliant",
+    shortLabel: "Potential difference",
+    plainLabel: "The notice may not match the applicable rule.",
     description:
       "The submitted material suggests a possible conflict with a cited provision. Confirmation requires human legal review.",
     badgeClassName:
@@ -179,7 +187,8 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
   },
   INSUFFICIENT_INFORMATION: {
     label: "Insufficient Information",
-    shortLabel: "Insufficient Information",
+    shortLabel: "Can't verify",
+    plainLabel: "There isn't enough information to verify this.",
     description:
       "Available material is not enough to support a conclusion. Additional evidence or source text is required.",
     badgeClassName:
@@ -191,6 +200,7 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
   MANUAL_LEGAL_REVIEW_NEEDED: {
     label: "Manual Legal Review Needed",
     shortLabel: "Manual Review",
+    plainLabel: "This case needs a closer legal review.",
     description:
       "The case is outside the safe scope of automated verification and should be reviewed by a qualified legal professional.",
     badgeClassName:
@@ -202,10 +212,10 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
 };
 
 export const PROCESSING_STEPS = [
-  "Reading the submitted material",
-  "Structuring notice fields",
-  "Locating cited legal provisions",
-  "Preparing the verification conversation",
+  "Reading your notice",
+  "Identifying the reported facts",
+  "Checking applicable regulations",
+  "Preparing a plain-language explanation",
 ] as const;
 
 export const DEMO_NOTICE_PLACEHOLDER =

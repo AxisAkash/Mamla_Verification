@@ -1,20 +1,32 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Manrope, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const bengali = Noto_Sans_Bengali({
+  variable: "--font-bengali",
+  subsets: ["bengali"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Mamla Verification — Verify Before You Pay. Know What the Law Says.",
+    default: "Mamla Verification — Verify Before You Pay",
     template: "%s · Mamla Verification",
   },
   description:
-    "AI-assisted legal and traffic-notice verification. Submit a notice and supporting evidence to understand what the law says before you pay.",
+    "Verify traffic notices against relevant laws with evidence-backed, plain-language explanations.",
+  openGraph: {
+    title: "Mamla Verification — Verify Before You Pay",
+    description:
+      "Evidence-backed, plain-language verification for traffic notices.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -22,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} h-full antialiased`}
+      className={`${manrope.variable} ${bengali.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
