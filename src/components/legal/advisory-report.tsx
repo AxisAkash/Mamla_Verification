@@ -9,7 +9,9 @@ import {
 } from "lucide-react";
 
 import { Citation } from "@/components/legal/citation";
+import { AskAboutCase } from "@/components/legal/ask-about-case";
 import { LegalProvisionCard } from "@/components/legal/legal-provision-card";
+import { NextSteps } from "@/components/legal/next-steps";
 import { VerificationStatusBadge, VerificationStatusPanel } from "@/components/legal/verification-status";
 import { EvidenceSection } from "@/components/evidence/evidence-section";
 import { Container } from "@/components/shared/container";
@@ -63,6 +65,17 @@ export function AdvisoryReport({ caseRecord, result }: AdvisoryReportProps) {
             </div>
             <VerificationStatusBadge status={result.status} size="md" />
           </div>
+
+          <section aria-label="Primary verification result">
+            <VerificationStatusPanel
+              status={result.status}
+              headline={result.headline}
+              className="p-6 sm:p-7"
+            />
+            <p className="mt-3 text-sm text-ink-secondary">
+              Based on the submitted information and the illustrative provision retained for this demonstration. Confidence indicator: <span className="font-semibold text-ink">{result.confidence}%</span>.
+            </p>
+          </section>
 
           <nav aria-label="Report structure" className="rounded-xl border border-border bg-card p-3 sm:p-4">
             <ol className="grid grid-cols-4 gap-2">
@@ -174,11 +187,6 @@ export function AdvisoryReport({ caseRecord, result }: AdvisoryReportProps) {
               <h2 className="type-h2 mt-1 text-ink">What the comparison found</h2>
             </div>
 
-            <VerificationStatusPanel
-              status={result.status}
-              headline={result.headline}
-            />
-
             <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
               <Card>
                 <CardHeader className="px-5 pt-5 sm:px-6">
@@ -198,7 +206,7 @@ export function AdvisoryReport({ caseRecord, result }: AdvisoryReportProps) {
                 </CardContent>
               </Card>
 
-              <Card className="border-status-review-border bg-status-review-bg">
+              <Card id="limitations" className="border-status-review-border bg-status-review-bg">
                 <CardHeader className="px-5 pt-5 sm:px-6">
                   <h3 className="type-h3 text-ink">Limitations</h3>
                 </CardHeader>
@@ -214,6 +222,9 @@ export function AdvisoryReport({ caseRecord, result }: AdvisoryReportProps) {
                 </CardContent>
               </Card>
             </div>
+
+            <AskAboutCase />
+            <NextSteps steps={result.nextSteps} />
 
             <div className="flex flex-col gap-4 rounded-xl border border-brand/15 bg-brand-soft/60 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>

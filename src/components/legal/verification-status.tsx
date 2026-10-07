@@ -76,10 +76,13 @@ export function VerificationStatusPanel({
       </span>
       <div className="min-w-0">
         <p className="type-caption opacity-80">Verification status</p>
-        <p className="mt-1 text-lg font-semibold text-ink">{meta.label}</p>
+        <p className="mt-1 text-lg font-semibold text-ink">{meta.plainLabel}</p>
         {headline ? (
           <p className="mt-1 text-sm font-medium text-ink/80">{headline}</p>
         ) : null}
+        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-ink/60">
+          {meta.label}
+        </p>
         <p className="type-small mt-1.5 text-ink-secondary">
           {meta.description}
         </p>

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, FilePlus2, MoreHorizontal } from "lucide-react";
 
 import { Logo } from "@/components/shared/logo";
+import { LanguageToggle } from "@/components/shared/language-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,7 +31,7 @@ import type {
 const STAGE_LABELS: Record<VerificationStage, string> = {
   input: "Notice details",
   processing: "Processing",
-  extracted: "Extracted fields",
+  extracted: "Check facts",
   conversation: "Verification conversation",
 };
 
@@ -173,6 +174,7 @@ export function VerificationShell() {
           </div>
 
           <DropdownMenu>
+            <LanguageToggle className="hidden sm:inline-flex" />
             <DropdownMenuTrigger
               aria-label="Workspace actions"
               render={<Button variant="outline" size="sm" className="gap-2" />}
@@ -205,7 +207,7 @@ export function VerificationShell() {
         {stage === "processing" ? <ProcessingState step={progressStep} /> : null}
         {stage === "extracted" ? (
           <ExtractedInformationPanel
-            onContinue={() => setStage("conversation")}
+            onConfirm={() => setStage("conversation")}
             onRestart={restart}
           />
         ) : null}

@@ -21,8 +21,8 @@ export function ProcessingState({ step }: ProcessingStateProps) {
             <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
           </span>
           <div>
-            <p className="type-caption text-brand">Processing demonstration</p>
-            <h1 className="type-h2 mt-1 text-ink">Preparing your case file</h1>
+            <p className="type-caption text-brand">Step 03 · Analyze</p>
+            <h1 className="type-h2 mt-1 text-ink">Reading your notice</h1>
             <p className="type-small mt-2 text-ink-secondary">
               Following the same visible steps a future connected verification
               service could perform. No OCR, model, or external service is active.

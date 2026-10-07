@@ -26,8 +26,8 @@ export function VerificationComposer({
     <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,0.7fr)] lg:gap-10 lg:py-14">
       <Card className="surface-raised gap-0 rounded-2xl">
         <CardHeader className="gap-2 border-b border-border px-5 py-5 sm:px-7 sm:py-7">
-          <p className="type-caption text-brand">New case · demonstration</p>
-          <h1 className="type-h2 text-ink">What would you like to verify?</h1>
+          <p className="type-caption text-brand">Step 01 · Submit notice</p>
+          <h1 className="type-h2 text-ink">Start a verification</h1>
           <p className="type-small max-w-2xl text-ink-secondary">
             Submit a traffic notice and any supporting material. This workspace
             uses mock data and does not process a real case.
