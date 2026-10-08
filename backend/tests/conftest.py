@@ -15,6 +15,7 @@ def client(tmp_path) -> Iterator[TestClient]:
         cors_origins="http://testserver",
         seed_demo_data=True,
         auto_create_tables=True,
+        max_upload_bytes=1024,
     )
     application = create_app(settings)
     with TestClient(application) as test_client:

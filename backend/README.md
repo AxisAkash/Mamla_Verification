@@ -11,7 +11,8 @@ HTTP routes -> services -> repositories -> SQLAlchemy -> PostgreSQL
 ```
 
 - `app/api/`: FastAPI routes and request-scoped dependencies
-- `app/services/`: case, deterministic extraction, evidence, verification, and future legal-retrieval seams
+- `app/services/`: case, OCR/text extraction, conservative structured extraction, evidence, verification, and future legal-retrieval seams
+- `app/ingestion/`: MIME/signature validation and filesystem storage of immutable originals
 - `app/repositories/`: database access only
 - `app/models/`: SQLAlchemy tables and normalized association tables
 - `app/schemas/`: typed API request and response models
@@ -60,7 +61,12 @@ The default without `.env` is a local SQLite file for development convenience. P
 - `CORS_ORIGINS`: comma-separated browser origins, default `http://localhost:3000`
 - `SEED_DEMO_DATA`: seed the four frontend-aligned demo cases, default `true`
 - `AUTO_CREATE_TABLES`: create tables on startup for local development; use Alembic in deployments
-- `MAX_REQUEST_BYTES`: request body limit, default 1 MiB
+- `MAX_REQUEST_BYTES`: request body limit, default 12 MiB
+- `MAX_UPLOAD_BYTES`: per-file limit, default 10 MiB
+- `STORAGE_ROOT`: private filesystem root for original uploads, default `./storage`
+- `OCR_LANGUAGES`: Tesseract language packs, default `eng+ben`
+- `TESSERACT_CMD`: optional path to the Tesseract executable
+- `MAX_DOCUMENT_PAGES`: PDF page limit, default 50
 
 Never commit `.env` or credentials.
 
@@ -84,6 +90,10 @@ The API is available at `http://localhost:8000`. OpenAPI UI and ReDoc are availa
 - `PATCH /api/cases/{case_id}/facts`
 - `POST /api/cases/{case_id}/verify`
 - `GET /api/cases/{case_id}/evidence`
+- `POST /api/cases/{case_id}/evidence` (multipart upload)
+- `POST /api/cases/{case_id}/evidence/{evidence_id}/extract`
+- `GET /api/cases/{case_id}/evidence/{evidence_id}/ocr`
+- `GET /api/cases/{case_id}/facts`
 - `GET /api/cases/{case_id}/result`
 
 The legacy `/api/v1` paths map to the same handlers. Request and response details are maintained in [`../docs/api-contract.md`](../docs/api-contract.md).
@@ -94,10 +104,10 @@ The legacy `/api/v1` paths map to the same handlers. Request and response detail
 pytest
 ```
 
-Tests use SQLite and deterministic fixtures; they do not call external services or claim real legal verification.
+Tests use SQLite, generated files, and a fake OCR provider; they do not call external services or claim real legal verification.
 
 ## Current limitations and future architecture
 
-There is no authentication, file storage, OCR, external legal source, AI model, RAG, vector search, payments, or external API integration. The extraction service currently returns retained fixture facts and otherwise reports no extracted fields. The verification service uses explicit workflow rules solely to exercise the frontend contract.
+There is no authentication, external legal source, AI model, RAG, vector search, payments, or external API integration. Uploads are stored under a private configured filesystem root and are not served directly. Tesseract must be installed separately when image/scanned-PDF OCR is enabled; unavailable engines return a `FAILED` processing state instead of fabricated text. The verification service uses explicit workflow rules solely to exercise the frontend contract.
 
-Future OCR can implement an `NoticeExtractionService` adapter behind the existing service boundary. A curated `LegalRetrievalService` can supply versioned, provenance-aware provisions. A later verification orchestrator can combine confirmed facts, retrieved provisions, and evidence while preserving limitations and human review states. Those additions must not turn demo provisions into authoritative law without verified sources and appropriate review.
+The OCR provider is isolated behind `OCRProvider` and currently has a Tesseract adapter configured for English and Bangla language packs. PDF ingestion first uses embedded text and renders scanned pages for OCR fallback. A later verification orchestrator can combine confirmed facts, retrieved provisions, and evidence while preserving limitations and human review states. Those additions must not turn demo provisions into authoritative law without verified sources and appropriate review.

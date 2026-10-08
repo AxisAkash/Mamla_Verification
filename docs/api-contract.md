@@ -10,7 +10,7 @@ This document is the frontend integration contract for the FastAPI backend. The 
 - Validation failures return HTTP 422 with `{ "error": { "code", "message" } }`.
 - Missing cases return HTTP 404 with error code `case_not_found`.
 - Server failures return a safe generic error without stack traces.
-- Request bodies are limited by `MAX_REQUEST_BYTES` (1 MiB by default).
+- Request bodies are limited by `MAX_REQUEST_BYTES` (12 MiB by default); individual files are limited by `MAX_UPLOAD_BYTES` (10 MiB by default).
 
 ## Verification states
 
@@ -80,29 +80,111 @@ Response:
 }
 ```
 
-## Notice extraction
+## Evidence upload and ingestion
 
-### `POST /api/cases/{caseId}/extract`
+### `POST /api/cases/{caseId}/evidence`
 
-The current service does not perform OCR or call an AI provider. It returns retained deterministic demo facts, or an empty field list for a newly-created case. Response:
+Accepts `multipart/form-data` with one `file` part. Supported pairs are:
+
+| Extension | MIME type | Processing |
+| --- | --- | --- |
+| `.jpg`, `.jpeg` | `image/jpeg` | Tesseract OCR |
+| `.png` | `image/png` | Tesseract OCR |
+| `.webp` | `image/webp` | Tesseract OCR |
+| `.pdf` | `application/pdf` | Embedded text, then scanned-page OCR fallback |
+| `.txt`, `.text` | `text/plain` | UTF-8 text extraction |
+
+The server validates the filename, declared MIME type, magic signature, decodability, PDF page count, and file size before storage. Original files are written under the private `STORAGE_ROOT` using a generated immutable storage key; client filenames are metadata only. Duplicate uploads for the same case return the existing evidence ID with `isDuplicate: true`.
+
+Response HTTP 201:
 
 ```json
 {
   "caseId": "MV-2026-0417",
-  "sourceLabel": "notice-photo.jpg",
-  "overallConfidence": 89,
-  "fields": [
+  "evidenceId": "ev-2f2d...",
+  "originalFilename": "notice-photo.jpg",
+  "mediaType": "image/jpeg",
+  "sizeBytes": 284120,
+  "sha256": "...",
+  "processingStatus": "UPLOADED",
+  "isDuplicate": false
+}
+```
+
+Unsupported types return 415, oversized files return 413, and malformed files return 415. No uploaded content is included in error logs.
+
+### `POST /api/cases/{caseId}/evidence/{evidenceId}/extract`
+
+Runs the ingestion pipeline synchronously for the selected original. It is safe to retry completed or empty evidence: the stored result is returned without rerunning extraction. Failed evidence can be retried. Response:
+
+```json
+{
+  "caseId": "MV-2026-0417",
+  "evidenceId": "ev-2f2d...",
+  "status": "COMPLETED",
+  "overallConfidence": 84,
+  "facts": [],
+  "error": null
+}
+```
+
+`status` is `UPLOADED`, `PROCESSING`, `COMPLETED`, `EMPTY`, or `FAILED`. `EMPTY` means the source was valid but no text was returned. `FAILED` includes a safe processing error and never substitutes invented text.
+
+## OCR and text extraction
+
+### `POST /api/cases/{caseId}/extract`
+
+This existing endpoint remains compatible. For a case with uploaded evidence it processes the latest uploaded item and returns the existing extraction shape plus optional `status`, `evidenceId`, and `error` fields. For seeded demo cases without uploaded evidence it returns their retained fixture facts as before.
+
+The OCR provider is behind an `OCRProvider` interface. The current adapter calls Tesseract with `OCR_LANGUAGES=eng+ben`; no AI API or legal source is called. PDF pages with embedded text are extracted directly. Empty pages are rendered and sent through the OCR provider. Raw page output is retained exactly in the database, while `normalizedText` is a separate Unicode/whitespace-normalized copy.
+
+### `GET /api/cases/{caseId}/evidence/{evidenceId}/ocr`
+
+Returns raw text, normalized text, page references, provider name, processing status, and safe error state:
+
+```json
+{
+  "caseId": "MV-2026-0417",
+  "evidenceId": "ev-2f2d...",
+  "status": "COMPLETED",
+  "rawText": "Notice number: DT-2026-4471\nLocation: Banani, Dhaka",
+  "normalizedText": "Notice number: DT-2026-4471\nLocation: Banani, Dhaka",
+  "pages": [{"pageNumber": 1, "text": "...", "source": "ocr:tesseract"}],
+  "provider": "tesseract",
+  "processedAt": "2026-01-14T09:20:00Z",
+  "error": null
+}
+```
+
+## Structured extracted facts
+
+### `GET /api/cases/{caseId}/facts`
+
+Returns only facts found in the retained text. Supported extracted keys include `noticeType`, `noticeNumber`, `issuingAuthority`, `violation`, `penaltyAmount`, `date`, `time`, `location`, `vehicleRegistration`, `vehicleType`, `vehicleMake`, and `vehicleModel`. Missing fields are omitted; they are never filled with assumptions.
+
+Each fact carries `value`, heuristic `confidence` (0-100), `sourceReference`, `sourceText`, and `evidenceIds`. Confidence describes extraction signal quality, not legal certainty.
+
+```json
+{
+  "caseId": "MV-2026-0417",
+  "evidenceId": "ev-2f2d...",
+  "status": "COMPLETED",
+  "overallConfidence": 84,
+  "facts": [
     {
       "key": "noticeNumber",
       "label": "Notice number",
       "value": "DT-2026-4471",
       "extractedValue": "DT-2026-4471",
       "confirmedValue": null,
-      "confidence": 96,
-      "evidenceIds": ["ev-photo"],
+      "confidence": 92,
+      "evidenceIds": ["ev-2f2d..."],
+      "sourceReference": "raw_chars:15-29",
+      "sourceText": "Notice number: DT-2026-4471",
       "isUserConfirmed": false
     }
-  ]
+  ],
+  "error": null
 }
 ```
 

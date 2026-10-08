@@ -65,7 +65,7 @@ The product is designed around calm competence rather than chatbot novelty. It a
 
 ## Current scope
 
-The frontend submission flow and report remain local mock data. The FastAPI backend now provides typed case, fact, evidence, and deterministic demo verification endpoints with SQLAlchemy persistence prepared for PostgreSQL. OCR, AI/RAG, authentication, external APIs, payments, and real legal data are not implemented.
+The frontend submission flow and report remain local mock data. The FastAPI backend now provides typed case, evidence upload, OCR/text extraction, structured fact extraction, and deterministic demo verification endpoints with SQLAlchemy persistence prepared for PostgreSQL. AI/RAG, authentication, external APIs, payments, and real legal data are not implemented.
 
 ## Backend
 
@@ -82,7 +82,7 @@ OpenAPI UI and ReDoc are available at `http://localhost:8000/docs` and `http://l
 
 ## Future frontend integration
 
-Feature UI reads explicit TypeScript domain models and mock records from `src/data/mock-data.ts`. A future service layer can replace the mock data source while keeping route composition and feature components separate. Backend, database, authentication, model, retrieval, and external API work should be introduced in a separate phase.
+Feature UI reads explicit TypeScript domain models and mock records from `src/data/mock-data.ts`. A future API adapter can replace the mock data source while keeping route composition and feature components separate. Backend OCR ingestion is available independently under `backend/`; authentication, legal retrieval, model integration, and external API work remain out of scope.
 
 ## Git branch strategy
 
