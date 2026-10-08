@@ -11,8 +11,11 @@ from app.api.routes.cases import router as cases_router
 from app.api.routes.health import router as health_router
 from app.core.config import Settings, get_settings
 from app.core.database import create_database_engine, create_session_factory, initialize_database
+from app.ingestion.file_validation import UploadValidationError
+from app.ingestion.storage import FileStorage
 from app.seed.demo_data import seed_demo_data
 from app.services.errors import CaseNotFoundError, InvalidFactsError
+from app.services.ocr_service import TesseractOCRProvider
 
 
 @asynccontextmanager
@@ -45,6 +48,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = resolved_settings
     app.state.engine = create_database_engine(resolved_settings)
     app.state.session_factory = create_session_factory(app.state.engine)
+    app.state.file_storage = FileStorage(
+        resolved_settings.storage_root,
+        resolved_settings.max_upload_bytes,
+        resolved_settings.max_document_pages,
+    )
+    app.state.ocr_provider = TesseractOCRProvider(resolved_settings.ocr_languages, resolved_settings.tesseract_cmd)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=resolved_settings.cors_origin_list,
@@ -67,6 +76,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.exception_handler(InvalidFactsError)
     async def invalid_facts(_: Request, exc: InvalidFactsError) -> JSONResponse:
         return JSONResponse(status_code=422, content={"error": {"code": "invalid_fact_key", "message": "The submitted facts contain an unsupported key."}})
+
+    @app.exception_handler(UploadValidationError)
+    async def invalid_upload(_: Request, exc: UploadValidationError) -> JSONResponse:
+        response_status = 413 if exc.code == "file_too_large" else 415
+        return JSONResponse(status_code=response_status, content={"error": {"code": exc.code, "message": exc.message}})
 
     @app.exception_handler(RequestValidationError)
     async def request_validation(_: Request, exc: RequestValidationError) -> JSONResponse:

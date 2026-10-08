@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models import CaseRecord, NoticeFact, TrafficNotice
@@ -36,4 +36,24 @@ class CaseRepository:
     def bump_version(self, case: CaseRecord) -> None:
         case.version += 1
         self.session.add(case)
+        self.session.flush()
+
+    def replace_extracted_facts(self, case_id: str, facts: list[NoticeFact]) -> None:
+        existing = self.get_facts(case_id)
+        incoming = {fact.key: fact for fact in facts}
+        for current in existing:
+            replacement = incoming.get(current.key)
+            if replacement is None:
+                if not current.is_user_confirmed:
+                    self.session.delete(current)
+                continue
+            current.label = replacement.label
+            current.extracted_value = replacement.extracted_value
+            current.confidence = replacement.confidence
+            current.evidence_ids = replacement.evidence_ids
+            current.source_reference = replacement.source_reference
+            current.source_text = replacement.source_text
+            incoming.pop(current.key)
+        for fact in incoming.values():
+            self.session.add(fact)
         self.session.flush()

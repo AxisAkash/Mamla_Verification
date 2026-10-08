@@ -37,6 +37,8 @@ def to_fact_response(fact: NoticeFact) -> NoticeFactResponse:
         confirmed_value=fact.confirmed_value,
         confidence=fact.confidence,
         evidence_ids=list(fact.evidence_ids or []),
+        source_reference=fact.source_reference,
+        source_text=fact.source_text,
         is_user_confirmed=fact.is_user_confirmed,
     )
 
