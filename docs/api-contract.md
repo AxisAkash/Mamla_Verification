@@ -1,178 +1,207 @@
-# Future API contract
+# Mamla Verification API Contract
 
-This contract is a frontend integration seam only. No endpoint is implemented
-in this repository, and every current record remains illustrative mock data.
+This document is the frontend integration contract for the FastAPI backend. The current implementation is a deterministic backend foundation. Case records, provisions, evidence, and verification outcomes marked `isDemo: true` are illustrative only and are not legal advice, official records, or authoritative law.
 
 ## Conventions
 
-- JSON over HTTPS under a versioned prefix such as /api/v1.
+- JSON over HTTP under `/api`; equivalent legacy paths are available under `/api/v1`.
 - IDs are opaque strings. Timestamps are ISO 8601 strings.
-- status is one of CONFORMS, POTENTIALLY_NONCOMPLIANT,
-  INSUFFICIENT_INFORMATION, or MANUAL_LEGAL_REVIEW.
-- Legal provisions must carry document, section, ruleIdentifier,
-  violationType, conditions, penalty, location, origin, and timeframe.
-- Responses must preserve the Claim → Evidence → Law → Result links through
-  IDs. Real legal authority and the disclaimer must be supplied by the future
-  service, not inferred by the frontend.
+- JSON fields use camelCase.
+- Validation failures return HTTP 422 with `{ "error": { "code", "message" } }`.
+- Missing cases return HTTP 404 with error code `case_not_found`.
+- Server failures return a safe generic error without stack traces.
+- Request bodies are limited by `MAX_REQUEST_BYTES` (1 MiB by default).
+
+## Verification states
+
+`status` is always one of:
+
+- `CONFORMS`
+- `POTENTIALLY_NONCOMPLIANT`
+- `INSUFFICIENT_INFORMATION`
+- `MANUAL_LEGAL_REVIEW`
+
+These are machine-readable workflow classifications. They do not determine guilt, authenticity, liability, or legal entitlement. A result must include `limitations`.
 
 ## Cases
 
-### Create a case
+### `POST /api/cases`
 
-POST /api/v1/cases
+Request:
 
-Request body:
-
-~~~ts
+```json
 {
-  inputType: 'image',
-  sourceLabel: 'notice-photo.jpg'
+  "inputType": "image",
+  "sourceLabel": "notice-photo.jpg"
 }
-~~~
+```
 
-Response 201 returns a Case envelope:
+`inputType` is `image`, `document`, `url`, or `text`. `sourceLabel` is required and is limited to 255 characters. Response is HTTP 201:
 
-~~~ts
+```json
 {
-  case: {
-    id: 'MV-2026-0417',
-    reference: 'MV-2026-0417',
-    title: 'Alleged signal non-compliance',
-    createdAt: '2026-01-14T09:12:00+06:00',
-    inputType: 'image',
-    sourceLabel: 'notice-photo.jpg',
-    status: 'INSUFFICIENT_INFORMATION',
-    isDemo: false
+  "case": {
+    "id": "MV-2026-A1B2",
+    "reference": "MV-2026-A1B2",
+    "title": "Traffic notice review",
+    "createdAt": "2026-01-14T09:12:00Z",
+    "updatedAt": "2026-01-14T09:12:00Z",
+    "inputType": "image",
+    "sourceLabel": "notice-photo.jpg",
+    "status": "INSUFFICIENT_INFORMATION",
+    "summary": "A notice has been received.",
+    "isDemo": false
   }
 }
-~~~
+```
 
-### Get a case
+### `GET /api/cases/{caseId}`
 
-GET /api/v1/cases/{caseId}
+Response:
 
-Response 200 returns the case, its TrafficNotice, and current workflow
-status. Missing cases return 404.
+```json
+{
+  "case": {},
+  "notice": {
+    "noticeType": "traffic",
+    "noticeNumber": "DT-2026-4471",
+    "issuingAuthority": "Submitted authority",
+    "issuedAt": "2026-01-14T08:41:00+06:00",
+    "location": "Submitted location",
+    "violationDescription": "Submitted allegation",
+    "penaltyAmount": null,
+    "vehicle": {
+      "registrationNumber": "Submitted registration",
+      "type": "Private car"
+    }
+  },
+  "status": "INSUFFICIENT_INFORMATION",
+  "version": 1
+}
+```
 
 ## Notice extraction
 
-### Extract notice facts
+### `POST /api/cases/{caseId}/extract`
 
-POST /api/v1/cases/{caseId}/notice-extraction
+The current service does not perform OCR or call an AI provider. It returns retained deterministic demo facts, or an empty field list for a newly-created case. Response:
 
-The request carries the submitted input reference. The response returns:
-
-~~~ts
+```json
 {
-  caseId: 'MV-2026-0417',
-  sourceLabel: 'notice-photo.jpg',
-  overallConfidence: 89,
-  fields: [
+  "caseId": "MV-2026-0417",
+  "sourceLabel": "notice-photo.jpg",
+  "overallConfidence": 89,
+  "fields": [
     {
-      key: 'noticeNumber',
-      label: 'Notice number',
-      value: 'DT-2026-4471',
-      confidence: 96,
-      evidenceIds: ['ev-photo'],
-      isUserConfirmed: false
+      "key": "noticeNumber",
+      "label": "Notice number",
+      "value": "DT-2026-4471",
+      "extractedValue": "DT-2026-4471",
+      "confirmedValue": null,
+      "confidence": 96,
+      "evidenceIds": ["ev-photo"],
+      "isUserConfirmed": false
     }
   ]
 }
-~~~
-
-No OCR or extraction implementation belongs in the current frontend.
+```
 
 ## Fact confirmation
 
-### Update confirmed facts
+### `PATCH /api/cases/{caseId}/facts`
 
-PATCH /api/v1/cases/{caseId}/facts
+Request:
 
-Request body:
-
-~~~ts
+```json
 {
-  facts: [
+  "facts": [
     {
-      key: 'location',
-      label: 'Location',
-      value: 'Banani, Dhaka',
-      isUserConfirmed: true
+      "key": "location",
+      "label": "Location",
+      "value": "Banani, Dhaka",
+      "isUserConfirmed": true
     }
   ]
 }
-~~~
+```
 
-Response 200 returns the normalized NoticeFact array and the updated case
-version. The server must retain user-confirmed values separately from
-machine-extracted values.
+Allowed keys are `noticeNumber`, `issuingAuthority`, `issuedAt`, `location`, `violation`, `vehicleRegistration`, `vehicleType`, and `penaltyAmount`. Values are limited to 2,000 characters. The database retains `extractedValue` and `confirmedValue` separately:
+
+```json
+{
+  "caseId": "MV-2026-0417",
+  "version": 2,
+  "facts": []
+}
+```
 
 ## Verification
 
-### Verify a case
+### `POST /api/cases/{caseId}/verify`
 
-POST /api/v1/cases/{caseId}/verification
+Response HTTP 200:
 
-Response 200 returns a VerificationResult envelope:
-
-~~~ts
+```json
 {
-  result: {
-    schemaVersion: 1,
-    id: 'RES-0417',
-    caseId: 'MV-2026-0417',
-    status: 'POTENTIALLY_NONCOMPLIANT',
-    headline: 'Possible conflict with a cited provision',
-    claim: '...',
-    summary: '...',
-    reasoning: ['...'],
-    limitations: ['...'],
-    comparison: [
+  "result": {
+    "schemaVersion": 1,
+    "id": "RES-0417",
+    "caseId": "MV-2026-0417",
+    "status": "POTENTIALLY_NONCOMPLIANT",
+    "headline": "Possible conflict with an illustrative provision",
+    "claim": "The demo notice alleges signal non-compliance.",
+    "summary": "The retained demo fields suggest a possible conflict.",
+    "reasoning": ["Demo fields were retained from a fixture."],
+    "limitations": ["This is not legal advice or an official record."],
+    "comparison": [
       {
-        label: 'Reported violation',
-        noticeSays: '...',
-        lawSays: '...'
+        "label": "Reported violation",
+        "noticeSays": "Crossing against a red signal",
+        "lawSays": "Signal state would need corroboration"
       }
     ],
-    provisionIds: ['prov-signal'],
-    citationIds: ['cite-provision'],
-    evidenceIds: ['ev-photo'],
-    generatedAt: '2026-01-14T09:20:00+06:00',
-    confidence: 68,
-    nextSteps: []
+    "provisionIds": ["prov-signal"],
+    "citationIds": ["cite-provision"],
+    "evidenceIds": ["ev-photo"],
+    "generatedAt": "2026-01-14T09:20:00+06:00",
+    "confidence": 68,
+    "nextSteps": []
   }
 }
-~~~
+```
 
-The result is advisory and must include limitations. CONFORMS means only
-that the retained comparison found no conflict; it is not a finding about
-guilt, authenticity, or legal liability.
+The current verification service is deliberately deterministic and transparent. It does not infer real legal meaning, retrieve current law, or claim that a notice is valid or invalid.
+
+### `GET /api/cases/{caseId}/result`
+
+Returns the same verification envelope after a result exists. A case without a result returns HTTP 404.
 
 ## Evidence
 
-### Get evidence for a case
+### `GET /api/cases/{caseId}/evidence`
 
-GET /api/v1/cases/{caseId}/evidence
+Returns only evidence linked to the requested case:
 
-Response 200:
-
-~~~ts
+```json
 {
-  caseId: 'MV-2026-0417',
-  items: [
+  "caseId": "MV-2026-0417",
+  "items": [
     {
-      id: 'ev-photo',
-      kind: 'image',
-      title: 'Notice photograph',
-      description: '...',
-      source: 'Uploaded by applicant',
-      capturedAt: '2026-01-14T09:10:00+06:00',
-      excerpt: '...',
-      isDemo: false
+      "id": "ev-photo",
+      "kind": "image",
+      "title": "Notice photograph",
+      "description": "Submitted notice image used by the demo workflow.",
+      "source": "Uploaded by applicant",
+      "capturedAt": "2026-01-14T09:10:00+06:00",
+      "excerpt": "DT-2026-4471 - Banani - signal allegation",
+      "isDemo": true
     }
   ]
 }
-~~~
+```
 
-The service should return only evidence linked to the requested case and
-should expose provenance without implying that a source is official.
+## Health and documentation
+
+- `GET /api/health` checks the API database connection.
+- `/docs` provides interactive OpenAPI documentation.
+- `/redoc` provides reference documentation.

@@ -4,7 +4,7 @@
 
 Mamla Verification is an AI-assisted legal and traffic-notice verification frontend. It presents an evidence-oriented workflow for structuring a traffic notice, confirming extracted facts, comparing the notice with retained legal conditions, and understanding the limits of a result.
 
-> This repository currently contains a frontend demonstration only. Its case records, citations, provisions, and outcomes are mock data and are not legal advice or official records.
+> The frontend and backend currently use illustrative case records, citations, provisions, and outcomes. They are not legal advice or official records.
 
 ## Technology stack
 
@@ -65,9 +65,22 @@ The product is designed around calm competence rather than chatbot novelty. It a
 
 ## Current scope
 
-The current phase is frontend only. The submission flow, fact confirmation, analysis state, optional case questions, and report are simulated with local mock data. OCR, AI/RAG, authentication, persistence, external APIs, payments, and backend services are not implemented.
+The frontend submission flow and report remain local mock data. The FastAPI backend now provides typed case, fact, evidence, and deterministic demo verification endpoints with SQLAlchemy persistence prepared for PostgreSQL. OCR, AI/RAG, authentication, external APIs, payments, and real legal data are not implemented.
 
-## Future integration
+## Backend
+
+The backend is documented in [`backend/README.md`](backend/README.md). Start it independently from the frontend:
+
+```bash
+cd backend
+python -m venv .venv
+python -m pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+OpenAPI UI and ReDoc are available at `http://localhost:8000/docs` and `http://localhost:8000/redoc`.
+
+## Future frontend integration
 
 Feature UI reads explicit TypeScript domain models and mock records from `src/data/mock-data.ts`. A future service layer can replace the mock data source while keeping route composition and feature components separate. Backend, database, authentication, model, retrieval, and external API work should be introduced in a separate phase.
 
@@ -86,7 +99,8 @@ case operations separate. The service boundary in
 case workflow data. It can later be replaced by an API adapter without adding
 backend behavior to this repository.
 
-The future endpoint shapes for create/get case, notice extraction, fact
+The endpoint shapes for create/get case, notice extraction, fact
 confirmation, verification, and evidence retrieval are documented in
-[`docs/api-contract.md`](docs/api-contract.md). No endpoint, database, OCR,
-AI/RAG, external API, authentication, or real legal data is implemented.
+[`docs/api-contract.md`](docs/api-contract.md). The backend's current
+verification states are deterministic demo classifications and must not be
+presented as authoritative legal results.
