@@ -2,105 +2,128 @@
 
 **Verify Before You Pay. Know What the Law Says.**
 
-Mamla Verification is an AI-assisted legal and traffic-notice verification frontend. It presents an evidence-oriented workflow for structuring a traffic notice, confirming extracted facts, comparing the notice with retained legal conditions, and understanding the limits of a result.
+Mamla Verification is an evidence-oriented legal and traffic-notice verification application. The frontend and backend are independent applications connected only through the HTTP API. Current case records, citations, provisions, and outcomes are illustrative data and are not legal advice or official records.
 
-> The frontend and backend currently use illustrative case records, citations, provisions, and outcomes. They are not legal advice or official records.
+## Repository structure
 
-## Technology stack
+```text
+Mamla_Verification/
+├── frontend/                 Next.js App Router application
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   └── next.config.ts
+├── backend/                  FastAPI application
+│   ├── app/
+│   ├── tests/
+│   ├── alembic/
+│   ├── alembic.ini
+│   ├── requirements.txt
+│   └── .env.example
+├── docs/                     Shared API contract
+├── AGENTS.md
+├── .gitignore
+└── README.md
+```
 
-- Next.js 16 App Router
-- React and TypeScript
-- Tailwind CSS 4
-- shadcn/ui (Base UI primitives)
-- Lucide React
-- npm
+## Frontend
 
-## Getting started
+The frontend uses Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, and Lucide React.
 
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open `http://localhost:3000`.
 
-Validation commands:
+Frontend validation:
 
 ```bash
+cd frontend
 npm run lint
 npm run build
 ```
 
-## Routes
-
-| Route | Purpose |
-| --- | --- |
-| `/` | Product landing page and experience preview |
-| `/verify` | Mock notice submission, extraction, conversation, and evidence workspace |
-| `/result/[id]` | Evidence-oriented demonstration report for a mock case |
-
-## Project structure
-
-```text
-public/
-  images/                  Static image assets
-  icons/                   Static icon assets
-src/
-  app/                     App Router pages, layouts, and global styles
-  components/
-    ui/                    shadcn/ui primitives
-    landing/               Landing page sections
-    verification/          Notice composer and investigation workspace
-    evidence/              Evidence cards, previews, and drawer
-    legal/                 Citations, provisions, statuses, and reports
-    shared/                Logo, container, and section heading
-  data/                    Typed demonstration records
-  lib/                     Shared constants and utilities
-  types/                   Case, verification, and legal domain models
-```
-
-## Design philosophy
-
-The product is designed around calm competence rather than chatbot novelty. It answers first, keeps proof one tap away, shows the Notice vs Law comparison, makes honest uncertainty a first-class result, and lets the user confirm extracted facts before any legal comparison. The visual system uses deep emerald, restrained warm gold, off-white surfaces, Manrope for Latin UI, Noto Sans Bengali as the language foundation, and evidence that stays traceable to its source.
-
-## Current scope
-
-The frontend submission flow and report remain local mock data. The FastAPI backend now provides typed case, evidence upload, OCR/text extraction, structured fact extraction, and deterministic demo verification endpoints with SQLAlchemy persistence prepared for PostgreSQL. AI/RAG, authentication, external APIs, payments, and real legal data are not implemented.
+Frontend routes include `/`, `/verify`, and `/result/[id]`. The UI currently uses typed local demonstration records behind `frontend/src/lib/services/case-service.ts`.
 
 ## Backend
 
-The backend is documented in [`backend/README.md`](backend/README.md). Start it independently from the frontend:
+The backend uses FastAPI, Pydantic, SQLAlchemy, PostgreSQL/SQLite, Alembic, and pytest. It provides case management, secure notice ingestion, OCR/text extraction, structured fact extraction, evidence retrieval, and deterministic demonstration verification states.
 
 ```bash
 cd backend
 python -m venv .venv
+```
+
+Activate the environment:
+
+```bash
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# macOS/Linux
+source .venv/bin/activate
+```
+
+Install and configure:
+
+```bash
 python -m pip install -r requirements.txt
+copy .env.example .env  # Windows
+# cp .env.example .env  # macOS/Linux
+```
+
+The backend defaults to a local SQLite database when no `.env` is present. PostgreSQL is the intended deployment database. OCR additionally requires the Tesseract executable and `eng`/`ben` language data; configure `TESSERACT_CMD` when it is not on `PATH`.
+
+Run migrations and start the API:
+
+```bash
+cd backend
+alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-OpenAPI UI and ReDoc are available at `http://localhost:8000/docs` and `http://localhost:8000/redoc`.
+The API is available at `http://localhost:8000`. OpenAPI and ReDoc are available at `/docs` and `/redoc`; health is available at `/api/health`.
 
-## Future frontend integration
+Backend tests:
 
-Feature UI reads explicit TypeScript domain models and mock records from `src/data/mock-data.ts`. A future API adapter can replace the mock data source while keeping route composition and feature components separate. Backend OCR ingestion is available independently under `backend/`; authentication, legal retrieval, model integration, and external API work remain out of scope.
+```bash
+cd backend
+pytest
+```
+
+Useful migration commands:
+
+```bash
+cd backend
+alembic current
+alembic history
+alembic upgrade head
+```
+
+## API boundary
+
+```text
+frontend browser application -> HTTP JSON/multipart API -> backend services -> database/storage
+```
+
+The frontend does not import Python code or backend internals. API request and response shapes are documented in [`docs/api-contract.md`](docs/api-contract.md). The backend also exposes equivalent legacy `/api/v1` case paths for compatibility.
+
+## Current scope
+
+OCR and notice ingestion are implemented behind replaceable service boundaries. RAG, LLM integration, training datasets, authentication, payments, external legal data, and authoritative legal verification remain out of scope. Deterministic result states are workflow classifications only and must not be presented as legal conclusions.
+
+## Design principles
+
+The product preserves a calm legal-tech palette and a Claim -> Evidence -> Law -> Result traceability model. Users can review extracted facts before legal comparison, uncertainty remains explicit, and evidence provenance stays visible. The frontend supports English and Bangla presentation; the backend OCR configuration defaults to English plus Bangla Tesseract language packs.
 
 ## Git branch strategy
 
-- `main` → protected integration/merge branch
-- `akash` → active development branch
+- `main` is the protected integration branch.
+- `akash` is the active development branch.
 
-Develop and commit on `akash`. Do not make direct development commits to `main`; merge reviewed work into `main` through the repository's integration workflow.
-
-## Backend-readiness boundary
-
-The frontend now keeps route composition, typed domain models, and mock-backed
-case operations separate. The service boundary in
-`src/lib/services/case-service.ts` is the only UI-facing access path for
-case workflow data. It can later be replaced by an API adapter without adding
-backend behavior to this repository.
-
-The endpoint shapes for create/get case, notice extraction, fact
-confirmation, verification, and evidence retrieval are documented in
-[`docs/api-contract.md`](docs/api-contract.md). The backend's current
-verification states are deterministic demo classifications and must not be
-presented as authoritative legal results.
+Develop and push only on `akash`. Never force-push or push directly to `main`.
