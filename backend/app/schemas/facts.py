@@ -15,7 +15,13 @@ class NoticeFactKey(str, Enum):
     violation = "violation"
     vehicle_registration = "vehicleRegistration"
     vehicle_type = "vehicleType"
+    vehicle_make = "vehicleMake"
+    vehicle_model = "vehicleModel"
     penalty_amount = "penaltyAmount"
+    notice_type = "noticeType"
+    date = "date"
+    time = "time"
+    other = "other"
 
 
 FACT_KEYS = frozenset(
@@ -27,7 +33,13 @@ FACT_KEYS = frozenset(
         "violation",
         "vehicleRegistration",
         "vehicleType",
+        "vehicleMake",
+        "vehicleModel",
         "penaltyAmount",
+        "noticeType",
+        "date",
+        "time",
+        "other",
     }
 )
 
@@ -47,6 +59,8 @@ class NoticeFactResponse(APIModel):
     confirmed_value: str | None = None
     confidence: int | None = Field(default=None, ge=0, le=100)
     evidence_ids: list[str] = Field(default_factory=list)
+    source_reference: str | None = None
+    source_text: str | None = None
     is_user_confirmed: bool
 
 
@@ -65,3 +79,15 @@ class ExtractionResponse(APIModel):
     source_label: str
     overall_confidence: int = Field(ge=0, le=100)
     fields: list[NoticeFactResponse]
+    status: str | None = None
+    evidence_id: str | None = None
+    error: str | None = None
+
+
+class FactListResponse(APIModel):
+    case_id: str
+    evidence_id: str | None = None
+    status: str
+    overall_confidence: int = Field(ge=0, le=100)
+    facts: list[NoticeFactResponse]
+    error: str | None = None

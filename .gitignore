@@ -37,6 +37,7 @@ yarn-error.log*
 !backend/.env.example
 .venv/
 backend/.venv/
+backend/storage/
 backend/*.db
 backend/__pycache__/
 backend/**/__pycache__/

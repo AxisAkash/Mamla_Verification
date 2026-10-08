@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, JSON, String, Table, Text, Uuid, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, JSON, String, Table, Text, Uuid, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -80,6 +81,8 @@ class NoticeFact(Base):
     confirmed_value: Mapped[str | None] = mapped_column(Text, nullable=True)
     confidence: Mapped[int | None] = mapped_column(Integer, nullable=True)
     evidence_ids: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    source_reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    source_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_user_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 
@@ -94,6 +97,19 @@ class Evidence(Base):
     captured_at: Mapped[str] = mapped_column(String(128), nullable=False)
     excerpt: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    original_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    media_type: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    storage_key: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
+    processing_status: Mapped[str] = mapped_column(String(32), nullable=False, default="UPLOADED", index=True)
+    extraction_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ocr_raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    normalized_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ocr_pages: Mapped[list[dict[str, object]] | None] = mapped_column(JSON, nullable=True, default=list)
+    ocr_provider: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    uploaded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=True)
 
 
 class LegalProvision(Base):

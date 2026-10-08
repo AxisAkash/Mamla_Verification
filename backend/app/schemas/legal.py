@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from pydantic import Field
@@ -21,6 +22,14 @@ class EvidenceResponse(APIModel):
     captured_at: str
     excerpt: str | None = None
     is_demo: bool
+    original_filename: str | None = None
+    media_type: str | None = None
+    size_bytes: int | None = None
+    sha256: str | None = None
+    processing_status: str = "UPLOADED"
+    extraction_error: str | None = None
+    uploaded_at: datetime | None = None
+    processed_at: datetime | None = None
 
 
 class EvidenceListResponse(APIModel):

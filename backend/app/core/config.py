@@ -19,7 +19,12 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     seed_demo_data: bool = True
     auto_create_tables: bool = True
-    max_request_bytes: int = Field(default=1_048_576, ge=1024, le=10_485_760)
+    max_request_bytes: int = Field(default=12_582_912, ge=1024, le=52_428_800)
+    max_upload_bytes: int = Field(default=10_485_760, ge=1024, le=50_000_000)
+    storage_root: str = "./storage"
+    ocr_languages: str = "eng+ben"
+    tesseract_cmd: str | None = None
+    max_document_pages: int = Field(default=50, ge=1, le=500)
 
     @property
     def cors_origin_list(self) -> list[str]:
