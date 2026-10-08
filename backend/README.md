@@ -54,6 +54,8 @@ postgresql+psycopg://mamla:change-me@localhost:5432/mamla_verification
 
 The default without `.env` is a local SQLite file for development convenience. PostgreSQL is the intended deployment database.
 
+Image and scanned-PDF OCR also require the Tesseract executable and its `eng` and `ben` language data to be installed on the host. Set `TESSERACT_CMD` when the executable is not on `PATH`. The Python `pytesseract` package is only the adapter; it does not bundle the OCR engine or language files.
+
 ## Configuration
 
 - `APP_ENV`: environment name, default `development`
