@@ -22,7 +22,7 @@ export function UrlInput() {
         />
       </div>
       <p className="type-small text-ink-secondary">
-        Use a public notice or portal link. This demo does not fetch external URLs.
+         URLs are retained only as an input option; this application does not fetch external URLs.
       </p>
     </div>
   );

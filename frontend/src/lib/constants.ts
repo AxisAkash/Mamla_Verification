@@ -212,10 +212,10 @@ export const STATUS_META: Record<VerificationStatus, StatusMeta> = {
 };
 
 export const PROCESSING_STEPS = [
-  "Reading your notice",
-  "Identifying the reported facts",
-  "Checking applicable regulations",
-  "Preparing a plain-language explanation",
+  "Preserving the original evidence",
+  "Extracting text from the document",
+  "Finding candidate notice facts",
+  "Saving a reviewable draft",
 ] as const;
 
 export const DEMO_NOTICE_PLACEHOLDER =

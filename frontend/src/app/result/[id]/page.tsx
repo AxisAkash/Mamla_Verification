@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdvisoryReport } from "@/components/legal/advisory-report";
+import { getApiCaseReport } from "@/lib/services/api-service";
 import { getCase, getCaseResult } from "@/lib/services/case-service";
 
 export const metadata: Metadata = {
@@ -36,7 +37,10 @@ async function ResultContent({ params }: ResultPageProps) {
   const caseRecord = getCase(id);
   const result = getCaseResult(id);
 
-  if (!caseRecord || !result) notFound();
+  if (caseRecord && result) return <AdvisoryReport caseRecord={caseRecord} result={result} />;
 
-  return <AdvisoryReport caseRecord={caseRecord} result={result} />;
+  const apiReport = await getApiCaseReport(id).catch(() => null);
+  if (!apiReport) notFound();
+
+  return <AdvisoryReport caseRecord={apiReport.caseRecord} result={apiReport.result} />;
 }

@@ -34,7 +34,7 @@ export function ExtractedInformationPanel({
           <p className="type-caption text-brand">Step 02 · Check facts</p>
           <h1 className="type-h2 text-ink">Check the facts before we verify.</h1>
           <p className="type-small max-w-2xl text-ink-secondary">
-            We read these details from the demonstration notice. Correct anything that looks wrong before it is used in the legal comparison.
+            These are candidate values read from your submitted evidence. Correct anything that looks wrong before continuing.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-border bg-canvas px-3 py-1 text-xs font-medium text-ink-secondary">
@@ -47,6 +47,11 @@ export function ExtractedInformationPanel({
         </CardHeader>
 
         <CardContent className="grid gap-3 px-5 py-5 sm:grid-cols-2 sm:px-7 sm:py-7">
+          {fields.length === 0 ? (
+            <p className="rounded-lg border border-status-review-border bg-status-review-bg p-4 text-sm text-ink-secondary sm:col-span-2">
+              No readable candidate facts were found. The original evidence is preserved, but missing or unreadable details are not filled in.
+            </p>
+          ) : null}
           {fields.map((field) => (
             <label key={field.key} className="rounded-lg border border-border bg-card p-4">
               <span className="flex items-center justify-between gap-2">
@@ -61,6 +66,12 @@ export function ExtractedInformationPanel({
                 className="mt-2 h-10 bg-canvas text-sm font-semibold text-ink"
                 aria-label={`Edit ${field.label}`}
               />
+              {field.sourceReference || field.sourceText ? (
+                <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">
+                  Source: {field.sourceReference ?? 'retained notice text'}
+                  {field.sourceText ? ` · ${field.sourceText}` : ''}
+                </p>
+              ) : null}
             </label>
           ))}
         </CardContent>
@@ -79,14 +90,14 @@ export function ExtractedInformationPanel({
               <Check aria-hidden="true" className="size-4.5" />
             </span>
             <div>
-              <p className="text-base font-semibold text-ink">Ready to check the law?</p>
-              <p className="type-small mt-1.5 text-ink-secondary">
-                Confirming sends these visible facts into the next mock analysis state.
+               <p className="text-base font-semibold text-ink">Ready to continue?</p>
+               <p className="type-small mt-1.5 text-ink-secondary">
+                 Confirming persists these visible facts before the workflow result is prepared.
               </p>
             </div>
           </div>
-          <Button onClick={() => onConfirm(fields)} className="mt-5 h-11 w-full gap-2">
-            Confirm and Check the Law
+           <Button onClick={() => onConfirm(fields)} disabled={fields.length === 0} className="mt-5 h-11 w-full gap-2">
+             Confirm facts and continue
             <ArrowRight aria-hidden="true" />
           </Button>
           <Button onClick={onRestart} variant="ghost" className="mt-2 h-10 w-full gap-2 text-ink-secondary">

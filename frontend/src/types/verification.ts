@@ -20,6 +20,11 @@ export type NoticeFactKey =
   | 'violation'
   | 'vehicleRegistration'
   | 'vehicleType'
+  | 'vehicleMake'
+  | 'vehicleModel'
+  | 'noticeType'
+  | 'date'
+  | 'time'
   | 'penaltyAmount';
 
 export type ConfidenceScore = number;
@@ -49,8 +54,12 @@ export interface NoticeFact {
   key: NoticeFactKey;
   label: string;
   value: string;
+  extractedValue?: string;
+  confirmedValue?: string;
   confidence?: ConfidenceScore;
   evidenceIds?: string[];
+  sourceReference?: string;
+  sourceText?: string;
   isUserConfirmed?: boolean;
 }
 
@@ -58,6 +67,8 @@ export interface ExtractedInformation {
   fields: NoticeFact[];
   overallConfidence: ConfidenceScore;
   sourceLabel: string;
+  rawText?: string;
+  normalizedText?: string;
 }
 
 /**

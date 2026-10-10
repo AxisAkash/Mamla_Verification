@@ -14,12 +14,24 @@ import type { VerificationInputType } from "@/types/verification";
 interface VerificationComposerProps {
   mode: VerificationInputType;
   onModeChange: (mode: VerificationInputType) => void;
+  file: File | null;
+  text: string;
+  error: string | null;
+  submitting: boolean;
+  onFileChange: (file: File | null) => void;
+  onTextChange: (value: string) => void;
   onSubmit: () => void;
 }
 
 export function VerificationComposer({
   mode,
   onModeChange,
+  file,
+  text,
+  error,
+  submitting,
+  onFileChange,
+  onTextChange,
   onSubmit,
 }: VerificationComposerProps) {
   return (
@@ -29,8 +41,7 @@ export function VerificationComposer({
           <p className="type-caption text-brand">Step 01 · Submit notice</p>
           <h1 className="type-h2 text-ink">Start a verification</h1>
           <p className="type-small max-w-2xl text-ink-secondary">
-            Submit a traffic notice and any supporting material. This workspace
-            uses mock data and does not process a real case.
+            Upload a notice for private text extraction and review. Reading a document does not produce a legal conclusion.
           </p>
         </CardHeader>
 
@@ -58,26 +69,31 @@ export function VerificationComposer({
             </TabsList>
 
             <TabsContent value="image">
-              <UploadPanel />
+              <UploadPanel file={file} onFileChange={onFileChange} />
             </TabsContent>
             <TabsContent value="url">
               <UrlInput />
             </TabsContent>
             <TabsContent value="text">
-              <TextInput />
+              <TextInput value={text} onChange={onTextChange} />
             </TabsContent>
           </Tabs>
 
           <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="type-small flex items-start gap-2 text-ink-secondary">
               <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-brand" />
-              No files are uploaded in this frontend demo.
+              Files are sent only to the configured Mamla backend for processing.
             </p>
-            <Button onClick={onSubmit} className="h-11 gap-2 px-5">
-              Start verification
+            <Button onClick={onSubmit} disabled={submitting} className="h-11 gap-2 px-5">
+              {submitting ? "Uploading…" : "Start verification"}
               <ArrowRight aria-hidden="true" />
             </Button>
           </div>
+          {error ? (
+            <p role="alert" className="rounded-lg border border-status-alert-border bg-status-alert-bg px-3 py-2 text-sm text-status-alert">
+              {error}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -88,7 +104,7 @@ export function VerificationComposer({
             {[
               "Notice details are structured into a case record.",
               "Supporting evidence is listed beside the conversation.",
-              "A demo report shows the claim, reasoning, and limitations.",
+              "A saved report shows the workflow state, evidence, and limitations.",
             ].map((item, index) => (
               <li key={item} className="flex items-start gap-3">
                 <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-soft text-xs font-semibold text-brand">
@@ -106,8 +122,8 @@ export function VerificationComposer({
             <div>
               <h2 className="text-sm font-semibold text-ink">A careful boundary</h2>
               <p className="type-small mt-1.5 text-ink-secondary">
-                This interface does not determine guilt, provide legal advice,
-                or connect to an official portal. All case details are illustrative.
+                 This interface does not determine guilt, provide legal advice,
+                 or connect to an official portal. Treat every extracted value as a candidate.
               </p>
             </div>
           </div>

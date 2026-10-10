@@ -95,7 +95,7 @@ export function VerificationChat({
             </div>
             <span className='hidden items-center gap-1.5 rounded-full border border-brand/20 bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand sm:inline-flex'>
               <ShieldCheck aria-hidden='true' className='size-3.5' />
-              Demo case
+               Saved case
             </span>
           </div>
 
@@ -183,7 +183,7 @@ export function VerificationChat({
             {pending ? (
               <div role='status' className='flex items-center gap-2 text-sm text-ink-secondary'>
                 <span className='size-2 animate-pulse rounded-full bg-brand' />
-                Preparing a demonstration response…
+                 Preparing a response…
               </div>
             ) : null}
             <div ref={messagesEndRef} />
@@ -218,7 +218,7 @@ export function VerificationChat({
               </Button>
             </div>
             <p className='mt-2 text-[11px] text-ink-muted'>
-              Replies are mock responses, not legal advice.
+               Conversation is optional. Replies are not legal advice.
             </p>
           </form>
         </section>

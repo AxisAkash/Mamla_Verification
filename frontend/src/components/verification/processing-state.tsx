@@ -21,11 +21,10 @@ export function ProcessingState({ step }: ProcessingStateProps) {
             <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
           </span>
           <div>
-            <p className="type-caption text-brand">Step 03 · Analyze</p>
-            <h1 className="type-h2 mt-1 text-ink">Reading your notice</h1>
+            <p className="type-caption text-brand">Step 02 · Extract</p>
+            <h1 className="type-h2 mt-1 text-ink">Processing your evidence</h1>
             <p className="type-small mt-2 text-ink-secondary">
-              Following the same visible steps a future connected verification
-              service could perform. No OCR, model, or external service is active.
+              Text extraction and OCR produce candidates for your review. This step does not verify the notice or determine a legal result.
             </p>
           </div>
         </div>
@@ -75,7 +74,7 @@ export function ProcessingState({ step }: ProcessingStateProps) {
 
         <p className="mt-6 flex items-center gap-2 text-xs text-ink-muted">
           <LockKeyhole aria-hidden="true" className="size-3.5" />
-          This demonstration does not send your input anywhere.
+           Your original file is retained privately by the configured backend.
         </p>
       </div>
     </div>
