@@ -48,7 +48,7 @@ npm run lint
 npm run build
 ```
 
-Frontend routes include `/`, `/verify`, and `/result/[id]`. The UI currently uses typed local demonstration records behind `frontend/src/lib/services/case-service.ts`.
+Frontend routes include `/`, `/verify`, and `/result/[id]`. Demonstration pages retain typed fixture records, while the verification workspace uses the HTTP adapter in `frontend/src/lib/services/api-service.ts`. Set `NEXT_PUBLIC_API_BASE_URL` in `frontend/.env.local` to connect it to the backend.
 
 ## Backend
 
@@ -115,7 +115,7 @@ The frontend does not import Python code or backend internals. API request and r
 
 ## Current scope
 
-OCR and notice ingestion are implemented behind replaceable service boundaries. RAG, LLM integration, training datasets, authentication, payments, external legal data, and authoritative legal verification remain out of scope. Deterministic result states are workflow classifications only and must not be presented as legal conclusions.
+OCR and notice ingestion are implemented behind replaceable service boundaries. The current local OCR adapter is Tesseract with `eng+ben`; it requires the executable and both language packs, and accuracy varies with scan quality, layout, handwriting, and mixed-script identifiers. RAG, LLM integration, training datasets, authentication, payments, external legal data, and authoritative legal verification remain out of scope. Deterministic result states are workflow classifications only and must not be presented as legal conclusions.
 
 ## Design principles
 

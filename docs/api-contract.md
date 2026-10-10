@@ -11,6 +11,7 @@ This document is the frontend integration contract for the FastAPI backend. The 
 - Missing cases return HTTP 404 with error code `case_not_found`.
 - Server failures return a safe generic error without stack traces.
 - Request bodies are limited by `MAX_REQUEST_BYTES` (12 MiB by default); individual files are limited by `MAX_UPLOAD_BYTES` (10 MiB by default).
+- The frontend uses `NEXT_PUBLIC_API_BASE_URL` to select the HTTP API. URL input is not fetched; upload a file or submit plain text for extraction.
 
 ## Verification states
 
@@ -130,13 +131,15 @@ Runs the ingestion pipeline synchronously for the selected original. It is safe 
 
 `status` is `UPLOADED`, `PROCESSING`, `COMPLETED`, `EMPTY`, or `FAILED`. `EMPTY` means the source was valid but no text was returned. `FAILED` includes a safe processing error and never substitutes invented text.
 
+The browser workflow keeps the returned case ID locally so it can reload the case, facts, and evidence after a refresh. Confirmed values are stored separately from extracted values; a confirmation request does not overwrite the retained candidate or source reference.
+
 ## OCR and text extraction
 
 ### `POST /api/cases/{caseId}/extract`
 
 This existing endpoint remains compatible. For a case with uploaded evidence it processes the latest uploaded item and returns the existing extraction shape plus optional `status`, `evidenceId`, and `error` fields. For seeded demo cases without uploaded evidence it returns their retained fixture facts as before.
 
-The OCR provider is behind an `OCRProvider` interface. The current adapter calls Tesseract with `OCR_LANGUAGES=eng+ben`; no AI API or legal source is called. PDF pages with embedded text are extracted directly. Empty pages are rendered and sent through the OCR provider. Raw page output is retained exactly in the database, while `normalizedText` is a separate Unicode/whitespace-normalized copy.
+The OCR provider is behind an `OCRProvider` interface. The current adapter calls local Tesseract with `OCR_LANGUAGES=eng+ben`; no AI API or legal source is called. Successful OCR page sources include the reported Tesseract version. Accuracy depends on scan quality, layout, handwriting, and installed language data. PDF pages with embedded text are extracted directly. Empty pages are rendered and sent through the OCR provider. Raw page output is retained exactly in the database, while `normalizedText` is a separate Unicode/whitespace-normalized copy.
 
 ### `GET /api/cases/{caseId}/evidence/{evidenceId}/ocr`
 
