@@ -77,4 +77,4 @@ class DocumentTextExtractionService:
 
     @staticmethod
     def _document_from_pages(pages: list[OCRPage]) -> ExtractedDocument:
-        return ExtractedDocument("".join(page.text for page in pages), pages, ";".join(sorted({page.source for page in pages})))
+        return ExtractedDocument("\n".join(page.text for page in pages), pages, ";".join(sorted({page.source for page in pages})))

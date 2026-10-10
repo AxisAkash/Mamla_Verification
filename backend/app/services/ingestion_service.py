@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -14,7 +15,7 @@ from app.schemas.ingestion import ExtractedFactsResponse, EvidenceUploadResponse
 from app.services.errors import CaseNotFoundError
 from app.services.mappers import to_fact_response
 from app.services.ocr_service import OCRProcessingError, OCRProvider
-from app.services.structured_extraction import StructuredNoticeExtractionService
+from app.services.structured_extraction import ExtractedFact, StructuredNoticeExtractionService
 from app.services.text_extraction import DocumentTextExtractionService
 from app.services.text_normalization import normalize_ocr_text
 
@@ -143,7 +144,7 @@ class EvidenceIngestionService:
         try:
             document = self.document_extractor.extract(self.storage.path_for(evidence.storage_key), evidence.media_type or "")
             normalized = normalize_ocr_text(document.raw_text)
-            extracted = self.structured_extractor.extract(document.raw_text)
+            extracted = [self._with_page_reference(item, document.pages) for item in self.structured_extractor.extract(document.raw_text)]
             facts = [
                 NoticeFact(
                     case_id=case.id,
@@ -190,6 +191,30 @@ class EvidenceIngestionService:
     def _confidence(facts: list[NoticeFact]) -> int:
         values = [fact.confidence for fact in facts if fact.confidence is not None]
         return round(sum(values) / len(values)) if values else 0
+
+    @staticmethod
+    def _with_page_reference(item: ExtractedFact, pages: list[object]) -> ExtractedFact:
+        match = re.search(r"raw_chars:(\d+)-", item.source_reference)
+        if not match or not pages:
+            return item
+        position = int(match.group(1))
+        offset = 0
+        page_number = 1
+        for index, page in enumerate(pages, start=1):
+            page_text = str(getattr(page, "text", ""))
+            if position <= offset + len(page_text):
+                page_number = index
+                break
+            offset += len(page_text) + 1
+            page_number = index
+        return ExtractedFact(
+            key=item.key,
+            label=item.label,
+            value=item.value,
+            confidence=item.confidence,
+            source_reference=f"{item.source_reference};page:{page_number}",
+            source_text=item.source_text,
+        )
 
     @staticmethod
     def _upload_response(case_id: str, evidence: Evidence, duplicate: bool) -> EvidenceUploadResponse:

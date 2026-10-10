@@ -32,10 +32,11 @@ def png_bytes() -> bytes:
     return output.getvalue()
 
 
-def pdf_bytes() -> bytes:
+def pdf_bytes(page_count: int = 1) -> bytes:
     output = BytesIO()
     writer = PdfWriter()
-    writer.add_blank_page(width=200, height=200)
+    for _ in range(page_count):
+        writer.add_blank_page(width=200, height=200)
     writer.write(output)
     return output.getvalue()
 
@@ -76,6 +77,21 @@ def test_invalid_file_type_and_oversized_file_are_rejected(client):
     assert oversized.json()["error"]["code"] == "file_too_large"
 
 
+def test_file_signature_and_path_traversal_are_handled_safely(client):
+    case_id = create_case(client)
+    bad_signature = upload(client, case_id, "notice.png", b"not a png", "image/png")
+    assert bad_signature.status_code == 415
+    assert bad_signature.json()["error"]["code"] == "invalid_file_signature"
+
+    safe_upload = upload(client, case_id, "../../outside.txt", b"Notice number: SAFE-2026-1", "text/plain")
+    assert safe_upload.status_code == 201
+    assert safe_upload.json()["originalFilename"] == "outside.txt"
+    storage_root = client.app.state.file_storage.root
+    stored_files = [path for path in storage_root.iterdir() if not path.name.startswith(".upload-")]
+    assert stored_files
+    assert all(path.parent == storage_root for path in stored_files)
+
+
 def test_text_ingestion_and_structured_extraction(client):
     client.app.state.ocr_provider = StaticOCRProvider()
     case_id = create_case(client, "text")
@@ -101,6 +117,7 @@ def test_text_ingestion_and_structured_extraction(client):
     assert fields["location"]["value"] == "Banani, Dhaka"
     assert fields["noticeNumber"]["confidence"] > 0
     assert fields["noticeNumber"]["sourceReference"].startswith("raw_chars:")
+    assert ";page:1" in fields["noticeNumber"]["sourceReference"]
     assert "DT-2026-1234" in fields["noticeNumber"]["sourceText"]
     assert "issuingAuthority" not in fields
     assert "vehicleType" not in fields
@@ -134,6 +151,44 @@ def test_pdf_ingestion_uses_ocr_fallback_and_mixed_text(client):
     ocr = client.get(f"/api/cases/{case_id}/evidence/{evidence_id}/ocr").json()
     assert ocr["rawText"] == "নোটিশ নম্বর: DT-2026-9988\nLocation: Dhaka"
     assert ocr["pages"][0]["source"] == "test-ocr"
+
+
+def test_scanned_pdf_processes_every_page(client):
+    client.app.state.ocr_provider = StaticOCRProvider("Page text বাংলা")
+    case_id = create_case(client, "document")
+    uploaded = upload(client, case_id, "multi-page.pdf", pdf_bytes(2), "application/pdf")
+    evidence_id = uploaded.json()["evidenceId"]
+
+    response = client.post(f"/api/cases/{case_id}/evidence/{evidence_id}/extract")
+    assert response.status_code == 200
+    ocr = client.get(f"/api/cases/{case_id}/evidence/{evidence_id}/ocr").json()
+    assert len(ocr["pages"]) == 2
+    assert [page["pageNumber"] for page in ocr["pages"]] == [1, 2]
+    assert ocr["rawText"] == "Page text বাংলা\nPage text বাংলা"
+
+
+def test_confirmed_facts_survive_retrieval_after_extraction(client):
+    case_id = create_case(client, "text")
+    uploaded = upload(client, case_id, "notice.txt", b"Location: Banani, Dhaka\nViolation: signal non-compliance", "text/plain")
+    evidence_id = uploaded.json()["evidenceId"]
+    assert client.post(f"/api/cases/{case_id}/evidence/{evidence_id}/extract").status_code == 200
+
+    updated = client.patch(
+        f"/api/cases/{case_id}/facts",
+        json={"facts": [
+            {"key": "location", "label": "Location", "value": "Confirmed Dhaka", "isUserConfirmed": True},
+            {"key": "violation", "label": "Alleged violation", "value": "signal non-compliance", "isUserConfirmed": True},
+        ]},
+    )
+    assert updated.status_code == 200
+    refreshed = client.get(f"/api/cases/{case_id}/facts").json()
+    location = next(item for item in refreshed["facts"] if item["key"] == "location")
+    assert location["value"] == "Confirmed Dhaka"
+    assert location["extractedValue"] == "Banani, Dhaka"
+    assert location["isUserConfirmed"] is True
+    result = client.post(f"/api/cases/{case_id}/verify")
+    assert result.status_code == 200
+    assert result.json()["result"]["status"] == "POTENTIALLY_NONCOMPLIANT"
 
 
 def test_empty_and_failed_ocr_are_explicit_states(client):

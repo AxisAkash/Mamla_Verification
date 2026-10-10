@@ -62,6 +62,7 @@ class CaseService:
         case = self.repository.get(case_id)
         if case is None:
             raise CaseNotFoundError(case_id)
+        notice = self.repository.get_notice(case_id)
         for item in request.facts:
             key = item.key.value
             if key not in FACT_KEYS:
@@ -86,6 +87,8 @@ class CaseService:
                 existing.label = item.label
                 existing.confirmed_value = item.value
                 existing.is_user_confirmed = item.is_user_confirmed
+            if notice is not None and item.is_user_confirmed:
+                self._apply_to_notice(notice, key, item.value)
         self.repository.bump_version(case)
         return FactsUpdateResponse(
             case_id=case_id,
@@ -99,3 +102,19 @@ class CaseService:
             if self.repository.get(reference) is None:
                 return reference
         raise RuntimeError("Unable to allocate a case reference")
+
+    @staticmethod
+    def _apply_to_notice(notice: TrafficNotice, key: str, value: str) -> None:
+        fields = {
+            "noticeNumber": "notice_number",
+            "issuingAuthority": "issuing_authority",
+            "issuedAt": "issued_at",
+            "location": "location",
+            "violation": "violation_description",
+            "vehicleRegistration": "vehicle_registration_number",
+            "vehicleType": "vehicle_type",
+            "penaltyAmount": "penalty_amount",
+        }
+        field = fields.get(key)
+        if field is not None:
+            setattr(notice, field, value)

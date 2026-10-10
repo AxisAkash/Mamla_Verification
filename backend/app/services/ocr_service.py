@@ -43,9 +43,13 @@ class TesseractOCRProvider:
             with Image.open(BytesIO(image_bytes)) as image:
                 text = self._pytesseract.image_to_string(image, lang=self.languages)
         except self._pytesseract.TesseractNotFoundError as exc:
-            raise OCRProcessingError("ocr_unavailable", "The configured OCR engine is unavailable.") from exc
+            raise OCRProcessingError("ocr_unavailable", "Tesseract is unavailable. Install Tesseract with the configured language packs and set TESSERACT_CMD when it is not on PATH.") from exc
         except self._pytesseract.TesseractError as exc:
-            raise OCRProcessingError("ocr_failed", "The OCR engine could not process the image.") from exc
+            raise OCRProcessingError("ocr_failed", "Tesseract could not process the image. Check OCR_LANGUAGES and the installed language packs.") from exc
         except Exception as exc:
             raise OCRProcessingError("ocr_failed", "The image could not be processed by the OCR engine.") from exc
-        return OCRPage(page_number=page_number, text=text, source="ocr:tesseract")
+        try:
+            version = str(self._pytesseract.get_tesseract_version()).splitlines()[0].strip()
+        except Exception:
+            version = "unknown"
+        return OCRPage(page_number=page_number, text=text, source=f"ocr:tesseract/{version}")
